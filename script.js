@@ -31,13 +31,14 @@ const formStatus = document.getElementById('form-status');
 // EmailJS Configuration (moved from HTML meta tags)
 const EJ_PUBLIC_KEY = 'Lnl3z8jkAukMKlYF7';
 const EJ_SERVICE_ID = 'service_nq7sylf';
-const EJ_TEMPLATE_ID = 'template_fp4ohcd';
+const EJ_TEMPLATE_ID = 'template_0nct9ie';
 
 if (contactForm) {
     // Initialize EmailJS
     if (typeof emailjs !== 'undefined') {
         try { 
             emailjs.init(EJ_PUBLIC_KEY); 
+            console.log('EmailJS initialized successfully');
         } catch (e) { 
             console.warn('emailjs.init failed', e); 
         }
@@ -48,54 +49,106 @@ if (contactForm) {
         formStatus.textContent = 'Sending...';
         formStatus.style.color = '#e50914'; // Use dark accent color for sending/error
 
+        console.log('=== EMAILJS DEBUG INFO ===');
+        console.log('EmailJS available:', typeof emailjs !== 'undefined');
+        console.log('Service ID:', EJ_SERVICE_ID);
+        console.log('Template ID:', EJ_TEMPLATE_ID);
+        console.log('Public Key:', EJ_PUBLIC_KEY);
+
         if (typeof emailjs !== 'undefined') {
-            // Get form data
+            console.log('Sending via EmailJS...');
+            
+            // Get form data and create template parameters
             const formData = new FormData(this);
             const templateParams = {
                 to_email: 'notdeath@duck.com',
                 from_name: formData.get('name'),
                 from_email: formData.get('email'),
                 subject: formData.get('title'),
+                message: formData.get('message'),
+                // Also try common alternative names
+                name: formData.get('name'),
+                email: formData.get('email'),
+                title: formData.get('title'),
                 message: formData.get('message')
             };
-
+            
+            console.log('Template parameters:', templateParams);
+            
             emailjs.send(EJ_SERVICE_ID, EJ_TEMPLATE_ID, templateParams)
-                .then(function() {
+                .then(function(response) {
+                    console.log('EmailJS SUCCESS!', response);
                     formStatus.textContent = 'Message sent successfully!';
                     formStatus.style.color = '#00cc00'; // Green for success
                     contactForm.reset();
                 }, function(error) {
-                    formStatus.textContent = 'Failed to send message. Please try again later.';
-                    console.error('FAILED...', error);
+                    console.error('EmailJS FAILED...', error);
+                    formStatus.textContent = 'EmailJS failed. Trying fallback...';
+                    
+                    // Try with different parameter names (common template variables)
+                    const fallbackParams = {
+                        to_email: 'notdeath@duck.com',
+                        from_name: formData.get('name'),
+                        from_email: formData.get('email'),
+                        subject: formData.get('title'),
+                        message: formData.get('message'),
+                        user_name: formData.get('name'),
+                        user_email: formData.get('email'),
+                        user_message: formData.get('message'),
+                        reply_to: formData.get('email')
+                    };
+                    
+                    console.log('Trying fallback parameters:', fallbackParams);
+                    
+                    emailjs.send(EJ_SERVICE_ID, EJ_TEMPLATE_ID, fallbackParams)
+                        .then(function(response) {
+                            console.log('EmailJS SUCCESS with fallback!', response);
+                            formStatus.textContent = 'Message sent successfully!';
+                            formStatus.style.color = '#00cc00';
+                            contactForm.reset();
+                        }, function(error) {
+                            console.error('EmailJS FAILED with fallback too', error);
+                            formStatus.textContent = 'Both EmailJS methods failed. Trying server...';
+                            tryServerSend();
+                        });
                 });
             return;
+        } else {
+            console.log('EmailJS not available, trying server...');
+            tryServerSend();
         }
 
-        // Try server-side send (SendGrid) if EmailJS is not available
-        try {
-            const data = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                title: document.getElementById('title').value,
-                message: document.getElementById('message').value,
-                to_email: 'notdeath@duck.com'
-            };
-            const res = await fetch('/api/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            if (!res.ok) {
-                const j = await res.json().catch(() => ({}));
-                throw new Error(j.error || 'Server error');
+        async function tryServerSend() {
+            // Try server-side send (SendGrid) if EmailJS is not available
+            try {
+                const data = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    title: document.getElementById('title').value,
+                    message: document.getElementById('message').value,
+                    to_email: 'notdeath@duck.com'
+                };
+                console.log('Sending to server:', data);
+                
+                const res = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!res.ok) {
+                    const j = await res.json().catch(() => ({}));
+                    throw new Error(j.error || 'Server error');
+                }
+                console.log('Server send SUCCESS');
+                formStatus.textContent = 'Message sent successfully via server!';
+                formStatus.style.color = '#00cc00';
+                contactForm.reset();
+            } catch (err) {
+                console.warn('Send failed:', err);
+                formStatus.textContent = 'All methods failed. Please check console for details.';
+                formStatus.style.color = '#ff6b6b';
             }
-            formStatus.textContent = 'Message sent successfully!';
-            formStatus.style.color = '#00cc00';
-            contactForm.reset();
-        } catch (err) {
-            console.warn('Send failed:', err);
-            formStatus.textContent = 'Failed to send message. Please try again later.';
-            formStatus.style.color = '#ff6b6b';
         }
     });
 }
@@ -133,7 +186,7 @@ if (contactForm) {
 
     function hideBanner() {
         if (!statusBanner) return;
-        statusBanner.classList.add('hidden');
+        statusBanner.classList.remove('hidden');
     }
 
     function renderComponents(components) {
@@ -329,3 +382,4 @@ if (contactForm) {
     // Start polling
     start();
 })();
+
