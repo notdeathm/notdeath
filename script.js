@@ -181,7 +181,7 @@ if (contactForm) {
 
     function hideBanner() {
         if (!statusBanner) return;
-        statusBanner.classList.remove('hidden');
+        statusBanner.classList.add('hidden');
     }
 
     function renderComponents(components) {

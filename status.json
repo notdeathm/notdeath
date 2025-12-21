@@ -1,14 +1,14 @@
 {
   "summary": "All systems operational",
   "status": "online",
-  "updated_at": "2025-12-14T13:57:08.022Z",
+  "updated_at": "2025-12-21T16:19:52.227Z",
   "components": [
     {
       "id": "site",
       "name": "Portfolio",
       "status": "online",
       "description": "Main personal website",
-      "checked_at": "2025-12-14T13:57:07.591Z",
+      "checked_at": "2025-12-21T16:19:46.847Z",
       "details": "200",
       "tls_expires": "2026-01-23T22:29:13.000Z"
     },
@@ -17,7 +17,7 @@
       "name": "GitHub",
       "status": "online",
       "description": "GitHub availability",
-      "checked_at": "2025-12-14T13:57:08.022Z",
+      "checked_at": "2025-12-21T16:19:52.227Z",
       "details": "200",
       "tls_expires": "2026-02-05T23:59:59.000Z"
     }
