@@ -36,8 +36,7 @@ console.log('Submit button found:', submitBtn);
 // EmailJS Configuration
 const EJ_PUBLIC_KEY = 'Lnl3z8jkAukMKlYF7';
 const EJ_SERVICE_ID = 'service_nq7sylf';
-const EJ_AUTO_REPLY_TEMPLATE_ID = 'template_0nct9ie'; // Auto-reply to sender
-const EJ_CONTACT_TEMPLATE_ID = 'template_r5mgdog'; // Contact message to you
+const EJ_CONTACT_TEMPLATE_ID = 'template_fo816z3'; // Contact message to you
 
 // Validation function
 function validateForm(formData) {
@@ -128,10 +127,9 @@ if (contactForm && submitBtn) {
             console.log('=== EMAILJS DEBUG INFO ===');
             console.log('EmailJS available:', typeof emailjs !== 'undefined');
             console.log('Service ID:', EJ_SERVICE_ID);
-            console.log('Auto-reply Template ID:', EJ_AUTO_REPLY_TEMPLATE_ID);
             console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
             console.log('Public Key:', EJ_PUBLIC_KEY);
-            
+
             // Prepare email parameters - Use standard EmailJS template parameter names
             const contactParams = {
                 to_email: 'notdeath@duck.com',
@@ -141,34 +139,18 @@ if (contactForm && submitBtn) {
                 message: formData.get('message')
             };
 
-            const autoReplyParams = {
-                to_email: formData.get('email'),
-                from_name: formData.get('name'),
-                from_email: formData.get('email'),
-                subject: formData.get('title'),
-                message: formData.get('message')
-            };
-
             console.log('=== EMAILJS PARAMETER CHECK ===');
             console.log('Contact params keys:', Object.keys(contactParams));
-            console.log('Auto-reply params keys:', Object.keys(autoReplyParams));
-
             console.log('Contact parameters:', contactParams);
-            console.log('Auto-reply parameters:', autoReplyParams);
 
             console.log('=== SENDING EMAILJS REQUEST ===');
             console.log('Service ID:', EJ_SERVICE_ID);
             console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
-            
-            // Send contact message first
+
+            // Send contact message
             console.log('Sending contact message...');
             const contactResponse = await emailjs.send(EJ_SERVICE_ID, EJ_CONTACT_TEMPLATE_ID, contactParams);
             console.log('Contact email sent successfully!', contactResponse);
-            
-            console.log('Sending auto-reply...');
-            // Then send auto-reply to sender
-            const autoReplyResponse = await emailjs.send(EJ_SERVICE_ID, EJ_AUTO_REPLY_TEMPLATE_ID, autoReplyParams);
-            console.log('Auto-reply sent successfully!', autoReplyResponse);
             
             formStatus.textContent = 'Message sent successfully!';
             formStatus.style.color = '#00cc00';
