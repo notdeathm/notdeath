@@ -48,6 +48,12 @@ function validateForm(formData) {
     const title = formData.get('title');
     const message = formData.get('message');
     
+    console.log('=== FORM VALIDATION DEBUG ===');
+    console.log('Name:', name, 'Length:', name ? name.length : 0);
+    console.log('Email:', email, 'Length:', email ? email.length : 0);
+    console.log('Title:', title, 'Length:', title ? title.length : 0);
+    console.log('Message:', message, 'Length:', message ? message.length : 0);
+    
     if (!name || name.trim().length === 0) {
         errors.push('Name is required');
     } else if (name.length > 50) {
@@ -56,7 +62,7 @@ function validateForm(formData) {
     
     if (!email || email.trim().length === 0) {
         errors.push('Email is required');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email.trim())) {
         errors.push('Please enter a valid email address');
     }
     
@@ -72,6 +78,7 @@ function validateForm(formData) {
         errors.push('Message must be less than 1000 characters');
     }
     
+    console.log('Validation errors:', errors);
     return errors;
 }
 
@@ -125,7 +132,7 @@ if (contactForm && submitBtn) {
             console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
             console.log('Public Key:', EJ_PUBLIC_KEY);
             
-            // Prepare email parameters
+            // Prepare email parameters - Use standard EmailJS template parameter names
             const contactParams = {
                 to_email: 'notdeath@duck.com',
                 from_name: formData.get('name'),
@@ -142,13 +149,23 @@ if (contactForm && submitBtn) {
                 message: formData.get('message')
             };
 
+            console.log('=== EMAILJS PARAMETER CHECK ===');
+            console.log('Contact params keys:', Object.keys(contactParams));
+            console.log('Auto-reply params keys:', Object.keys(autoReplyParams));
+
             console.log('Contact parameters:', contactParams);
             console.log('Auto-reply parameters:', autoReplyParams);
 
+            console.log('=== SENDING EMAILJS REQUEST ===');
+            console.log('Service ID:', EJ_SERVICE_ID);
+            console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
+            
             // Send contact message first
+            console.log('Sending contact message...');
             const contactResponse = await emailjs.send(EJ_SERVICE_ID, EJ_CONTACT_TEMPLATE_ID, contactParams);
             console.log('Contact email sent successfully!', contactResponse);
             
+            console.log('Sending auto-reply...');
             // Then send auto-reply to sender
             const autoReplyResponse = await emailjs.send(EJ_SERVICE_ID, EJ_AUTO_REPLY_TEMPLATE_ID, autoReplyParams);
             console.log('Auto-reply sent successfully!', autoReplyResponse);
@@ -160,16 +177,25 @@ if (contactForm && submitBtn) {
             
         } catch (error) {
             console.error('EmailJS failed:', error);
+            console.log('=== EMAILJS ERROR DETAILS ===');
+            console.log('Error status:', error.status);
+            console.log('Error text:', error.text);
+            console.log('Error message:', error.message);
+            console.log('Full error object:', error);
             
             // Handle specific EmailJS errors
             let errorMessage = 'Failed to send message. Please try again.';
             
             if (error.status === 422) {
-                errorMessage = 'Invalid email format or missing required fields.';
+                console.log('422 Error detected - this suggests EmailJS template issues');
+                errorMessage = 'EmailJS template configuration issue. Please check your EmailJS service setup.';
             } else if (error.status === 429) {
                 errorMessage = 'Too many requests. Please wait a moment before trying again.';
             } else if (error.text && error.text.includes('service')) {
                 errorMessage = 'Email service configuration error. Please contact support.';
+            } else {
+                // More generic error handling
+                errorMessage = `EmailJS Error: ${error.message || 'Unknown error'}`;
             }
             
             formStatus.textContent = errorMessage;
