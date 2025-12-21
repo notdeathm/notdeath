@@ -28,6 +28,9 @@ themeToggle.addEventListener('click', () => {
 const contactForm = document.getElementById('contact-form');
 const formStatus = document.getElementById('form-status');
 
+console.log('Contact form found:', contactForm);
+console.log('Form status element found:', formStatus);
+
 // EmailJS Configuration (moved from HTML meta tags)
 const EJ_PUBLIC_KEY = 'Lnl3z8jkAukMKlYF7';
 const EJ_SERVICE_ID = 'service_nq7sylf';
@@ -37,16 +40,19 @@ const EJ_CONTACT_TEMPLATE_ID = 'template_r5mgdog'; // Contact message to you
 if (contactForm) {
     // Initialize EmailJS
     if (typeof emailjs !== 'undefined') {
-        try { 
-            emailjs.init(EJ_PUBLIC_KEY); 
+        try {
+            emailjs.init(EJ_PUBLIC_KEY);
             console.log('EmailJS initialized successfully');
-        } catch (e) { 
-            console.warn('emailjs.init failed', e); 
+        } catch (e) {
+            console.warn('emailjs.init failed', e);
         }
     }
 
-    contactForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
+    // Use button click instead of form submit to prevent default form behavior
+    const submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+        submitBtn.addEventListener('click', async function(event) {
+            event.preventDefault();
         formStatus.textContent = 'Sending...';
         formStatus.style.color = '#e50914'; // Use dark accent color for sending/error
 
@@ -87,6 +93,24 @@ if (contactForm) {
                     console.log('Contact email sent successfully!', contactResponse);
 
                     // Then send auto-reply to sender
+                    return emailjs.send(EJ_SERVICE_ID, EJ_AUTO_REPLY_TEMPLATE_ID, autoReplyParams);
+                })
+                .then(function(autoReplyResponse) {
+                    console.log('Auto-reply sent successfully!', autoReplyResponse);
+                    formStatus.textContent = 'Message sent successfully!';
+                    formStatus.style.color = '#00cc00'; // Green for success
+                    contactForm.reset();
+                })
+                .catch(function(error) {
+                    console.error('EmailJS FAILED...', error);
+                    formStatus.textContent = 'EmailJS failed. Trying server...';
+                    tryServerSend();
+                });
+            return;
+        } else {
+            console.log('EmailJS not available, trying server...');
+            tryServerSend();
+        }
 
         async function tryServerSend() {
             // Try server-side send (SendGrid) if EmailJS is not available
@@ -99,13 +123,13 @@ if (contactForm) {
                     to_email: 'notdeath@duck.com'
                 };
                 console.log('Sending to server:', data);
-                
+
                 const res = await fetch('/api/send', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                
+
                 if (!res.ok) {
                     const j = await res.json().catch(() => ({}));
                     throw new Error(j.error || 'Server error');
@@ -120,7 +144,8 @@ if (contactForm) {
                 formStatus.style.color = '#ff6b6b';
             }
         }
-    });
+        });
+    }
 }
 
 /* Live Status Polling and UI */
