@@ -27,47 +27,137 @@ themeToggle.addEventListener('click', () => {
 // JavaScript for Contact Form (using EmailJS)
 const contactForm = document.getElementById('contact-form');
 const formStatus = document.getElementById('form-status');
+const submitBtn = document.getElementById('submit-btn');
 
 console.log('Contact form found:', contactForm);
 console.log('Form status element found:', formStatus);
+console.log('Submit button found:', submitBtn);
 
-// EmailJS Configuration (moved from HTML meta tags)
+// EmailJS Configuration
 const EJ_PUBLIC_KEY = 'Lnl3z8jkAukMKlYF7';
 const EJ_SERVICE_ID = 'service_nq7sylf';
 const EJ_AUTO_REPLY_TEMPLATE_ID = 'template_0nct9ie'; // Auto-reply to sender
 const EJ_CONTACT_TEMPLATE_ID = 'template_r5mgdog'; // Contact message to you
 
-if (contactForm) {
-    // Initialize EmailJS
-    if (typeof emailjs !== 'undefined') {
-        try {
-            emailjs.init(EJ_PUBLIC_KEY);
-            console.log('EmailJS initialized successfully');
-        } catch (e) {
-            console.warn('emailjs.init failed', e);
-        }
+// Validation function
+function validateForm(formData) {
+    const errors = [];
+    
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const title = formData.get('title');
+    const message = formData.get('message');
+    
+    if (!name || name.trim().length === 0) {
+        errors.push('Name is required');
+    } else if (name.length > 50) {
+        errors.push('Name must be less than 50 characters');
     }
+    
+    if (!email || email.trim().length === 0) {
+        errors.push('Email is required');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Please enter a valid email address');
+    }
+    
+    if (!title || title.trim().length === 0) {
+        errors.push('Subject is required');
+    } else if (title.length > 100) {
+        errors.push('Subject must be less than 100 characters');
+    }
+    
+    if (!message || message.trim().length === 0) {
+        errors.push('Message is required');
+    } else if (message.length > 1000) {
+        errors.push('Message must be less than 1000 characters');
+    }
+    
+    return errors;
+}
 
-    // Use button click instead of form submit to prevent default form behavior
-    const submitBtn = document.getElementById('submit-btn');
-    if (submitBtn) {
-        submitBtn.addEventListener('click', async function(event) {
-            event.preventDefault();
+// Server-side send function (moved outside to fix scope issues)
+async function tryServerSend() {
+    try {
+        const data = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            title: document.getElementById('title').value,
+            message: document.getElementById('message').value,
+            to_email: 'notdeath@duck.com'
+        };
+        
+        console.log('Sending to server:', data);
+        formStatus.textContent = 'Sending via server...';
+        
+        const res = await fetch('/api/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (!res.ok) {
+            const j = await res.json().catch(() => ({}));
+            throw new Error(j.error || `Server error (${res.status})`);
+        }
+        
+        console.log('Server send SUCCESS');
+        formStatus.textContent = 'Message sent successfully!';
+        formStatus.style.color = '#00cc00';
+        contactForm.reset();
+        showToast('Message sent successfully!');
+        
+    } catch (err) {
+        console.error('Server send failed:', err);
+        formStatus.textContent = `Failed to send: ${err.message}`;
+        formStatus.style.color = '#ff6b6b';
+        showToast('Failed to send message. Please try again.');
+    }
+}
+
+// Initialize EmailJS
+if (typeof emailjs !== 'undefined') {
+    try {
+        emailjs.init(EJ_PUBLIC_KEY);
+        console.log('EmailJS initialized successfully');
+    } catch (e) {
+        console.warn('emailjs.init failed', e);
+    }
+}
+
+// Contact form event handler
+if (contactForm && submitBtn) {
+    submitBtn.addEventListener('click', async function(event) {
+        event.preventDefault();
+        
+        // Disable button during sending
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        
         formStatus.textContent = 'Sending...';
-        formStatus.style.color = '#e50914'; // Use dark accent color for sending/error
-
-        console.log('=== EMAILJS DEBUG INFO ===');
-        console.log('EmailJS available:', typeof emailjs !== 'undefined');
-        console.log('Service ID:', EJ_SERVICE_ID);
-        console.log('Auto-reply Template ID:', EJ_AUTO_REPLY_TEMPLATE_ID);
-        console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
-        console.log('Public Key:', EJ_PUBLIC_KEY);
-
-        if (typeof emailjs !== 'undefined') {
-            console.log('Sending via EmailJS...');
-
+        formStatus.style.color = '#e50914';
+        
+        try {
             // Get form data
-            const formData = new FormData(this);
+            const formData = new FormData(contactForm);
+            
+            // Validate form
+            const validationErrors = validateForm(formData);
+            if (validationErrors.length > 0) {
+                formStatus.textContent = validationErrors[0];
+                formStatus.style.color = '#ff6b6b';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+                return;
+            }
+            
+            console.log('=== EMAILJS DEBUG INFO ===');
+            console.log('EmailJS available:', typeof emailjs !== 'undefined');
+            console.log('Service ID:', EJ_SERVICE_ID);
+            console.log('Auto-reply Template ID:', EJ_AUTO_REPLY_TEMPLATE_ID);
+            console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
+            console.log('Public Key:', EJ_PUBLIC_KEY);
+            
+            // Prepare email parameters
             const contactParams = {
                 to_email: 'notdeath@duck.com',
                 from_name: formData.get('name'),
@@ -77,7 +167,7 @@ if (contactForm) {
             };
 
             const autoReplyParams = {
-                to_email: formData.get('email'), // Send auto-reply to the sender
+                to_email: formData.get('email'),
                 from_name: formData.get('name'),
                 from_email: formData.get('email'),
                 subject: formData.get('title'),
@@ -87,65 +177,42 @@ if (contactForm) {
             console.log('Contact parameters:', contactParams);
             console.log('Auto-reply parameters:', autoReplyParams);
 
-            // Send contact message to you first
-            emailjs.send(EJ_SERVICE_ID, EJ_CONTACT_TEMPLATE_ID, contactParams)
-                .then(function(contactResponse) {
-                    console.log('Contact email sent successfully!', contactResponse);
-
-                    // Then send auto-reply to sender
-                    return emailjs.send(EJ_SERVICE_ID, EJ_AUTO_REPLY_TEMPLATE_ID, autoReplyParams);
-                })
-                .then(function(autoReplyResponse) {
-                    console.log('Auto-reply sent successfully!', autoReplyResponse);
-                    formStatus.textContent = 'Message sent successfully!';
-                    formStatus.style.color = '#00cc00'; // Green for success
-                    contactForm.reset();
-                })
-                .catch(function(error) {
-                    console.error('EmailJS FAILED...', error);
-                    formStatus.textContent = 'EmailJS failed. Trying server...';
-                    tryServerSend();
-                });
-            return;
-        } else {
-            console.log('EmailJS not available, trying server...');
-            tryServerSend();
-        }
-
-        async function tryServerSend() {
-            // Try server-side send (SendGrid) if EmailJS is not available
-            try {
-                const data = {
-                    name: document.getElementById('name').value,
-                    email: document.getElementById('email').value,
-                    title: document.getElementById('title').value,
-                    message: document.getElementById('message').value,
-                    to_email: 'notdeath@duck.com'
-                };
-                console.log('Sending to server:', data);
-
-                const res = await fetch('/api/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                if (!res.ok) {
-                    const j = await res.json().catch(() => ({}));
-                    throw new Error(j.error || 'Server error');
-                }
-                console.log('Server send SUCCESS');
-                formStatus.textContent = 'Message sent successfully via server!';
+            // Try EmailJS first if available
+            if (typeof emailjs !== 'undefined') {
+                console.log('Sending via EmailJS...');
+                formStatus.textContent = 'Sending via EmailJS...';
+                
+                // Send contact message first
+                const contactResponse = await emailjs.send(EJ_SERVICE_ID, EJ_CONTACT_TEMPLATE_ID, contactParams);
+                console.log('Contact email sent successfully!', contactResponse);
+                
+                // Then send auto-reply
+                const autoReplyResponse = await emailjs.send(EJ_SERVICE_ID, EJ_AUTO_REPLY_TEMPLATE_ID, autoReplyParams);
+                console.log('Auto-reply sent successfully!', autoReplyResponse);
+                
+                formStatus.textContent = 'Message sent successfully!';
                 formStatus.style.color = '#00cc00';
                 contactForm.reset();
-            } catch (err) {
-                console.warn('Send failed:', err);
-                formStatus.textContent = 'All methods failed. Please check console for details.';
-                formStatus.style.color = '#ff6b6b';
+                showToast('Message sent successfully!');
+                
+            } else {
+                console.log('EmailJS not available, trying server...');
+                await tryServerSend();
             }
+            
+        } catch (error) {
+            console.error('EmailJS failed:', error);
+            formStatus.textContent = 'EmailJS failed. Trying server...';
+            
+            // Fallback to server-side send
+            await tryServerSend();
+            
+        } finally {
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Message';
         }
-        });
-    }
+    });
 }
 
 /* Live Status Polling and UI */
