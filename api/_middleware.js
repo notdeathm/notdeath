@@ -15,7 +15,7 @@ export default function middleware(req, res, next) {
 
   // Rate Limiting for specific routes
   const path = req.nextUrl.pathname;
-  if (path === '/api/report' || path === '/api/send') {
+  if (path === '/api/report') {
     const ip = req.ip || req.headers.get('x-forwarded-for');
     const limit = 5; // 5 requests per minute
     const window = 60 * 1000; // 1 minute
