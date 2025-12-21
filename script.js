@@ -24,6 +24,27 @@ themeToggle.addEventListener('click', () => {
     }
 });
 
+// Small toast helper (global function for both contact form and status reporting)
+function showToast(message, timeout = 3000) {
+    let t = document.getElementById('global-toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'global-toast';
+        t.style.position = 'fixed';
+        t.style.right = '20px';
+        t.style.bottom = '20px';
+        t.style.background = '#111';
+        t.style.color = '#fff';
+        t.style.padding = '10px 14px';
+        t.style.borderRadius = '8px';
+        t.style.boxShadow = '0 4px 16px rgba(0,0,0,0.4)';
+        document.body.appendChild(t);
+    }
+    t.textContent = message;
+    t.style.opacity = '1';
+    setTimeout(() => { t.style.opacity = '0'; }, timeout);
+}
+
 // JavaScript for Contact Form (using EmailJS)
 const contactForm = document.getElementById('contact-form');
 const formStatus = document.getElementById('form-status');
@@ -381,26 +402,7 @@ if (contactForm && submitBtn) {
         });
     }
 
-    // Small toast helper
-    function showToast(message, timeout = 3000) {
-        let t = document.getElementById('global-toast');
-        if (!t) {
-            t = document.createElement('div');
-            t.id = 'global-toast';
-            t.style.position = 'fixed';
-            t.style.right = '20px';
-            t.style.bottom = '20px';
-            t.style.background = '#111';
-            t.style.color = '#fff';
-            t.style.padding = '10px 14px';
-            t.style.borderRadius = '8px';
-            t.style.boxShadow = '0 4px 16px rgba(0,0,0,0.4)';
-            document.body.appendChild(t);
-        }
-        t.textContent = message;
-        t.style.opacity = '1';
-        setTimeout(() => { t.style.opacity = '0'; }, timeout);
-    }
+
 
     function scheduleNext() {
         clearTimeout(pollTimer);

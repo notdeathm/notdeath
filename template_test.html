@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EmailJS Template Test</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <h1>EmailJS Template Content Test</h1>
+    <p>This test will show you exactly what your EmailJS template receives.</p>
+
+    <form id="template-test">
+        <input type="text" name="name" placeholder="Name" value="Test User">
+        <input type="email" name="email" placeholder="Email" value="test@example.com">
+        <input type="text" name="subject" placeholder="Subject" value="Test Subject">
+        <textarea name="message" placeholder="Message">This is a test message from template_test.html</textarea>
+        <button type="submit">Test Template</button>
+    </form>
+
+    <div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+
+    <h2>What Your EmailJS Template Should Contain:</h2>
+    <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; font-family: monospace;">
+        <strong>Subject:</strong> {{subject}}<br><br>
+        <strong>Recipient:</strong> {{to_email}}<br><br>
+        <strong>Message Body:</strong><br>
+        From: {{from_name}} <{{from_email}}><br>
+        Subject: {{subject}}<br><br>
+        {{message}}
+    </div>
+
+    <script>
+        // Initialize EmailJS
+        const PUBLIC_KEY = 'Lnl3z8jkAukMKlYF7';
+        const SERVICE_ID = 'service_nq7sylf';
+        const TEMPLATE_ID = 'template_fo816z3';
+
+        if (typeof emailjs !== 'undefined') {
+            emailjs.init(PUBLIC_KEY);
+            console.log('EmailJS initialized');
+        }
+
+        document.getElementById('template-test').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (typeof emailjs === 'undefined') {
+                document.getElementById('result').innerHTML = '<span style="color: red;">EmailJS not loaded</span>';
+                return;
+            }
+
+            const formData = new FormData(this);
+            const templateParams = {
+                to_email: 'notdeath@duck.com',
+                from_name: formData.get('name'),
+                from_email: formData.get('email'),
+                subject: formData.get('subject'),
+                message: formData.get('message')
+            };
+
+            console.log('Template parameters being sent:', templateParams);
+
+            document.getElementById('result').innerHTML = '<span style="color: blue;">Sending test email...</span>';
+
+            emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS:', response);
+                    document.getElementById('result').innerHTML =
+                        '<span style="color: green;">✅ Email sent successfully!</span><br>' +
+                        '<strong>Check your email at notdeath@duck.com</strong><br>' +
+                        '<small>The email should contain the sender\'s name and email address.</small>';
+                }, function(error) {
+                    console.error('FAILED:', error);
+                    document.getElementById('result').innerHTML =
+                        '<span style="color: red;">❌ Failed: ' + JSON.stringify(error) + '</span>';
+                });
+        });
+    </script>
+</body>
+</html>
