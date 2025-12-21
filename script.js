@@ -28,17 +28,19 @@ themeToggle.addEventListener('click', () => {
 const contactForm = document.getElementById('contact-form');
 const formStatus = document.getElementById('form-status');
 
-if (contactForm) {
-    // Initialize EmailJS if public key provided via meta tag
-    const ejPublicMeta = document.querySelector('meta[name="emailjs-public-key"]');
-    const ejServiceMeta = document.querySelector('meta[name="emailjs-service"]');
-    const ejTemplateMeta = document.querySelector('meta[name="emailjs-template"]');
-    const EJ_PUBLIC = (ejPublicMeta && ejPublicMeta.content) || window.EMAILJS_PUBLIC_KEY || null;
-    const EJ_SERVICE = (ejServiceMeta && ejServiceMeta.content) || window.EMAILJS_SERVICE_ID || null;
-    const EJ_TEMPLATE = (ejTemplateMeta && ejTemplateMeta.content) || window.EMAILJS_TEMPLATE_ID || null;
+// EmailJS Configuration (moved from HTML meta tags)
+const EJ_PUBLIC_KEY = 'Lnl3z8jkAukMKlYF7';
+const EJ_SERVICE_ID = 'service_nq7sylf';
+const EJ_TEMPLATE_ID = 'template_fp4ohcd';
 
-    if (EJ_PUBLIC && typeof emailjs !== 'undefined') {
-        try { emailjs.init(EJ_PUBLIC); } catch (e) { console.warn('emailjs.init failed', e); }
+if (contactForm) {
+    // Initialize EmailJS
+    if (typeof emailjs !== 'undefined') {
+        try { 
+            emailjs.init(EJ_PUBLIC_KEY); 
+        } catch (e) { 
+            console.warn('emailjs.init failed', e); 
+        }
     }
 
     contactForm.addEventListener('submit', async function(event) {
@@ -46,8 +48,18 @@ if (contactForm) {
         formStatus.textContent = 'Sending...';
         formStatus.style.color = '#e50914'; // Use dark accent color for sending/error
 
-        if (EJ_SERVICE && EJ_TEMPLATE && typeof emailjs !== 'undefined') {
-            emailjs.sendForm(EJ_SERVICE, EJ_TEMPLATE, this)
+        if (typeof emailjs !== 'undefined') {
+            // Get form data
+            const formData = new FormData(this);
+            const templateParams = {
+                to_email: 'notdeath@duck.com',
+                from_name: formData.get('name'),
+                from_email: formData.get('email'),
+                subject: formData.get('title'),
+                message: formData.get('message')
+            };
+
+            emailjs.send(EJ_SERVICE_ID, EJ_TEMPLATE_ID, templateParams)
                 .then(function() {
                     formStatus.textContent = 'Message sent successfully!';
                     formStatus.style.color = '#00cc00'; // Green for success
@@ -59,13 +71,14 @@ if (contactForm) {
             return;
         }
 
-        // Try server-side send (SendGrid) if available
+        // Try server-side send (SendGrid) if EmailJS is not available
         try {
             const data = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
+                title: document.getElementById('title').value,
                 message: document.getElementById('message').value,
-                to_email: (document.querySelector('input[name="to_email"]') || {}).value || 'notdeath@duck.com'
+                to_email: 'notdeath@duck.com'
             };
             const res = await fetch('/api/send', {
                 method: 'POST',
