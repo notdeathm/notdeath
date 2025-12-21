@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio of Death - Developer skilled in HTML, CSS, JavaScript, Node.js, REST API, Git, and Python.">
+    <meta name="status-endpoint" content="status.json">
+    <meta name="emailjs-service" content="">
+    <meta name="emailjs-template" content="">
+    <meta name="emailjs-public-key" content="Lnl3z8jkAukMKlYF7">
+    <meta name="keywords" content="Death, Developer, Portfolio, GitHub, Projects">
+    <title>Death's Portfolio</title>
+    <link rel="canonical" href="https://notdeath.vercel.app/">
+    <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#000000">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Death's Portfolio">
+    <meta property="og:description" content="A personal engineering status page and portfolio.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://notdeath.vercel.app/">
+    <meta property="og:image" content="https://notdeath.vercel.app/assets/icon.svg">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="@notdeath_m">
+    <meta name="twitter:title" content="Death's Portfolio">
+    <meta name="twitter:description" content="A personal engineering status page and portfolio.">
+    <meta name="twitter:image" content="https://notdeath.vercel.app/assets/icon.svg">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"> <!-- For Icons -->
+    <link rel="stylesheet" href="styles.css"> <!-- Link to external CSS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script> <!-- EmailJS for sending emails -->
+</head>
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-1S0R7KMVEH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-1S0R7KMVEH');
+</script>
+    
+<body>
+    <button id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+
+    <header>
+        <img src="https://github.com/notdeathm.png" alt="Death's Profile Picture">
+        <h1>Death</h1>
+    </header>
+
+    <!-- Status banner: visible when any component is degraded or down -->
+    <div id="status-banner" class="status-banner hidden" role="status" aria-live="polite">
+        <strong id="banner-text">Some services are experiencing issues.</strong>
+    </div>
+
+    <main>
+        <section id="about">
+            <h2>About Me</h2>
+            <p>I am Death, a developer skilled in HTML, CSS, JavaScript, Node.js, REST API, Git, and Python. I build projects and explore the depths of code.</p>
+        </section>
+
+        <section id="skills">
+            <h2>Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <i class="fab fa-html5" style="color: #e34c26;"></i>
+                    <p>HTML</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fab fa-css3-alt" style="color: #264de4;"></i>
+                    <p>CSS</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fab fa-js-square" style="color: #f0db4f;"></i>
+                    <p>JavaScript</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fab fa-node-js" style="color: #68a063;"></i>
+                    <p>Node.js</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fas fa-code" style="color: #ffffff;"></i>
+                    <p>REST API</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fab fa-git-alt" style="color: #f1502f;"></i>
+                    <p>Git</p>
+                </div>
+                <div class="skill-card">
+                    <i class="fab fa-python" style="color: #306998;"></i>
+                    <p>Python</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Projects</h2>
+            <div class="project-card">
+                <h3>Project 1: Death Status Dashboard</h3>
+                <p>I mean i dont need to explain since you already in the website so yea if you wanna see the code you can (not advanced it basic) you can go to the repo and check it</p>
+                <div class="project-links">
+                    <a href="https://github.com/notdeathm/notdeath" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                    <a href="https://notdeath.vercel.app/" target="_blank"><i class="fas fa-globe"></i> Live Demo</a>
+                </div>
+            </div>
+            <div class="project-card">
+                <h3>Project 2: Coming Soon</h3>
+                <p>Stay tuned!</p>
+                <div class="project-links">
+                    <a href="#" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                    <a href="#" target="_blank"><i class="fas fa-globe"></i> Live Demo</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="live-status">
+            <h2>Live Status</h2>
+            <div class="status-container">
+                <div id="status-badge" class="status unknown">Unknown</div>
+                <div id="status-message">Status data not loaded yet.</div>
+                <div id="components-list" class="components-list"></div>
+                <h3>Incidents</h3>
+                <div id="incidents-list" class="incidents-list">No incidents reported.</div>
+                <details class="report-box">
+                    <summary>Report an incident</summary>
+                    <form id="report-form">
+                        <input type="text" id="inc-title" name="title" placeholder="Short title" required>
+                        <textarea id="inc-body" name="body" rows="3" placeholder="Details" required></textarea>
+                        <!-- honeypot field to trap bots (should be empty) -->
+                        <input type="text" name="hp" id="hp" style="display:none" aria-hidden="true">
+                        <!-- timestamp to prevent too-quick submissions -->
+                        <input type="hidden" id="report-ts" name="ts" value="">
+                        <button type="submit">Report</button>
+                        <p id="report-status" class="report-status"></p>
+                    </form>
+                </details>
+                <div class="status-controls">
+                    <button id="refresh-status">Refresh</button>
+                    <span id="last-updated" aria-live="polite"></span>
+                </div>
+                <p id="status-error" class="error" role="status"></p>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Contact Me</h2>
+            <form id="contact-form">
+                <input type="text" id="name" name="name" placeholder="Your Name" required>
+                <input type="email" id="email" name="email" placeholder="Your Email" required>
+                <textarea id="message" name="message" rows="5" placeholder="Your Message" required></textarea>
+                <!-- Ensure EmailJS template receives the recipient address -->
+                <input type="hidden" name="to_email" value="notdeath@duck.com">
+                <button type="submit">Send Message</button>
+                <p id="form-status" style="color: #ff0000;"></p>
+            </form>
+        </section>
+    </main>
+
+        <footer>
+            <div class="social-links">
+                <a href="https://github.com/notdeathm" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://twitter.com/notdeath_m" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#contact" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+            <p>&copy; 2025 Death. All rights reserved.</p>
+        </footer>
+
+    <script src="script.js"></script> <!-- Link to external JavaScript -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          }, err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+        });
+      }
+    </script>
+</body>
+</html>

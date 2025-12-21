@@ -1,0 +1,17 @@
+[
+  {
+    "time": "2025-12-14T13:57:08.022Z",
+    "status": "online",
+    "summary": "All systems operational",
+    "components": [
+      {
+        "id": "site",
+        "status": "online"
+      },
+      {
+        "id": "github",
+        "status": "online"
+      }
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "components": [
+    {
+      "id": "site",
+      "name": "Portfolio",
+      "type": "http",
+      "url": "https://notdeath.vercel.app/",
+      "expect": 200,
+      "description": "Main personal website"
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "type": "http",
+      "url": "https://github.com/",
+      "expect": 200,
+      "description": "GitHub availability"
+    }
+  ],
+  "alerts": {
+    "notify_on_change": true
+  }
+}
