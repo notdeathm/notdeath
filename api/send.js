@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   if (!emailRegex.test(email)) return res.status(400).json({ error: 'Invalid email' });
 
   const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
-  const SENDER_EMAIL = process.env.SENDER_EMAIL || '{{email}}';
+  const SENDER_EMAIL = process.env.SENDER_EMAIL || 'no-reply@notdeath.vercel.app';
   const recipient = to_email || 'notdeath@duck.com';
 
   if (!SENDGRID_API_KEY) {

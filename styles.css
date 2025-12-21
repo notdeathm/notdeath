@@ -380,7 +380,8 @@ textarea {
     resize: vertical;
 }
 
-button[type="submit"] {
+button[type="submit"],
+#submit-btn {
     background-color: var(--color-dark-accent);
     color: var(--color-dark-text);
     padding: 12px 25px;
@@ -390,6 +391,8 @@ button[type="submit"] {
     font-size: 1.1em;
     font-weight: bold;
     transition: background-color 0.3s;
+    width: auto;
+    min-width: 120px;
 }
 
 body.light-mode button[type="submit"] {
