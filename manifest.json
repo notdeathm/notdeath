@@ -8,9 +8,9 @@
   "description": "Portfolio of Death - Developer skilled in HTML, CSS, JavaScript, Node.js, REST API, Git, and Python.",
   "icons": [
     {
-      "src": "/assets/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
