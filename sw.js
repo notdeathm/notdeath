@@ -1,10 +1,10 @@
-const CACHE_NAME = 'death-status-v1';
+const CACHE_NAME = 'notdeath-cache';
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
   '/script.js',
-  '/assets/icon.svg',
+  '/assets/icon.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
 ];
 

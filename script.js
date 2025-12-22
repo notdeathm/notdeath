@@ -1,3 +1,230 @@
+/* Smooth Scroll and Intersection Observer Animations */
+(function() {
+    // Add CSS for scroll animations
+    const scrollAnimationsCSS = `
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .slide-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .slide-in-right {
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .slide-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .scale-in {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .scale-in.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        /* Stagger animation delays for children */
+        .stagger-children > * {
+            transition-delay: calc(var(--stagger-delay, 0) * 100ms);
+        }
+    `;
+    
+    // Add the CSS to the document
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = scrollAnimationsCSS;
+    document.head.appendChild(styleSheet);
+    
+    // Smooth scroll behavior for anchor links
+    function initSmoothScroll() {
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    }
+    
+    // Initialize scroll animations
+    function initScrollAnimations() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Unobserve after animation to improve performance
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        // Add animation classes to elements
+        const animatedElements = [
+            { selector: 'header', animation: 'fade-in' },
+            { selector: '#about', animation: 'slide-in-left' },
+            { selector: '#skills', animation: 'fade-in' },
+            { selector: '#projects', animation: 'slide-in-right' },
+            { selector: '#contact', animation: 'fade-in' },
+            { selector: 'footer', animation: 'slide-in-left' }
+        ];
+        
+        animatedElements.forEach(({ selector, animation }) => {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.classList.add(animation);
+                observer.observe(element);
+            }
+        });
+        
+        // Add staggered animations to skill cards and project cards
+        const skillCards = document.querySelectorAll('.skill-card');
+        skillCards.forEach((card, index) => {
+            card.style.setProperty('--stagger-delay', index);
+            card.classList.add('fade-in', 'stagger-children');
+            observer.observe(card);
+        });
+        
+        const projectCards = document.querySelectorAll('.project-card');
+        projectCards.forEach((card, index) => {
+            card.style.setProperty('--stagger-delay', index);
+            card.classList.add('scale-in', 'stagger-children');
+            observer.observe(card);
+        });
+        
+        const contactItems = document.querySelectorAll('.contact-item');
+        contactItems.forEach((item, index) => {
+            item.style.setProperty('--stagger-delay', index);
+            item.classList.add('slide-in-left', 'stagger-children');
+            observer.observe(item);
+        });
+        
+        // Add timeline animations
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        timelineItems.forEach((item, index) => {
+            item.style.setProperty('--stagger-delay', index);
+            observer.observe(item);
+        });
+    }
+    
+    // Add scroll-to-top button
+    function addScrollToTopButton() {
+        const scrollButton = document.createElement('button');
+        scrollButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+        scrollButton.className = 'scroll-to-top';
+        scrollButton.setAttribute('aria-label', 'Scroll to top');
+        
+        // Add CSS for the scroll button
+        const scrollButtonCSS = `
+            .scroll-to-top {
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                background: var(--color-dark-accent);
+                color: var(--color-dark-text);
+                border: none;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                font-size: 1.2em;
+                cursor: pointer;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 1000;
+                box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+            }
+            
+            .scroll-to-top.visible {
+                opacity: 1;
+                visibility: visible;
+            }
+            
+            .scroll-to-top:hover {
+                background: var(--color-dark-accent-hover);
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+            }
+            
+            body.light-mode .scroll-to-top {
+                background: var(--color-light-accent);
+                color: var(--color-light-card);
+                box-shadow: 0 4px 12px rgba(204, 0, 0, 0.2);
+            }
+            
+            body.light-mode .scroll-to-top:hover {
+                background: var(--color-light-accent-hover);
+                box-shadow: 0 6px 20px rgba(204, 0, 0, 0.3);
+            }
+        `;
+        
+        styleSheet.textContent += scrollButtonCSS;
+        document.body.appendChild(scrollButton);
+        
+        // Show/hide scroll button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollButton.classList.add('visible');
+            } else {
+                scrollButton.classList.remove('visible');
+            }
+        });
+        
+        // Scroll to top functionality
+        scrollButton.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    // Initialize all animations and UX improvements
+    function init() {
+        initSmoothScroll();
+        initScrollAnimations();
+        addScrollToTopButton();
+    }
+    
+    // Start when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
 // JavaScript for Theme Toggle
 const themeToggle = document.getElementById('theme-toggle');
 const body = document.body;
@@ -59,47 +286,86 @@ const EJ_PUBLIC_KEY = 'Lnl3z8jkAukMKlYF7';
 const EJ_SERVICE_ID = 'service_nq7sylf';
 const EJ_CONTACT_TEMPLATE_ID = 'template_fo816z3'; // Contact message to you
 
-// Validation function
-function validateForm(formData) {
-    const errors = [];
+// Real-time validation function
+function validateField(fieldName, value) {
+    const errors = {};
     
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const title = formData.get('title');
-    const message = formData.get('message');
-    
-    console.log('=== FORM VALIDATION DEBUG ===');
-    console.log('Name:', name, 'Length:', name ? name.length : 0);
-    console.log('Email:', email, 'Length:', email ? email.length : 0);
-    console.log('Title:', title, 'Length:', title ? title.length : 0);
-    console.log('Message:', message, 'Length:', message ? message.length : 0);
-    
-    if (!name || name.trim().length === 0) {
-        errors.push('Name is required');
-    } else if (name.length > 50) {
-        errors.push('Name must be less than 50 characters');
+    switch (fieldName) {
+        case 'name':
+            if (!value || value.trim().length === 0) {
+                errors[fieldName] = 'Name is required';
+            } else if (value.length > 50) {
+                errors[fieldName] = 'Name must be less than 50 characters';
+            }
+            break;
+        case 'email':
+            if (!value || value.trim().length === 0) {
+                errors[fieldName] = 'Email is required';
+            } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(value.trim())) {
+                errors[fieldName] = 'Please enter a valid email address';
+            }
+            break;
+        case 'title':
+            if (!value || value.trim().length === 0) {
+                errors[fieldName] = 'Subject is required';
+            } else if (value.length > 100) {
+                errors[fieldName] = 'Subject must be less than 100 characters';
+            }
+            break;
+        case 'message':
+            if (!value || value.trim().length === 0) {
+                errors[fieldName] = 'Message is required';
+            } else if (value.length > 1000) {
+                errors[fieldName] = 'Message must be less than 1000 characters';
+            }
+            break;
     }
     
-    if (!email || email.trim().length === 0) {
-        errors.push('Email is required');
-    } else if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(email.trim())) {
-        errors.push('Please enter a valid email address');
-    }
-    
-    if (!title || title.trim().length === 0) {
-        errors.push('Subject is required');
-    } else if (title.length > 100) {
-        errors.push('Subject must be less than 100 characters');
-    }
-    
-    if (!message || message.trim().length === 0) {
-        errors.push('Message is required');
-    } else if (message.length > 1000) {
-        errors.push('Message must be less than 1000 characters');
-    }
-    
-    console.log('Validation errors:', errors);
     return errors;
+}
+
+// Show/hide field error
+function showFieldError(fieldName, message) {
+    const errorElement = document.getElementById(fieldName + '-error');
+    const inputElement = document.getElementById(fieldName);
+    
+    if (errorElement && inputElement) {
+        if (message) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+            inputElement.style.borderColor = '#ff6b6b';
+        } else {
+            errorElement.textContent = '';
+            errorElement.classList.remove('show');
+            inputElement.style.borderColor = '';
+        }
+    }
+}
+
+// Add real-time validation listeners
+function addRealTimeValidation() {
+    const fields = ['name', 'email', 'title', 'message'];
+    
+    fields.forEach(fieldName => {
+        const field = document.getElementById(fieldName);
+        if (field) {
+            field.addEventListener('blur', function() {
+                const errors = validateField(fieldName, this.value);
+                showFieldError(fieldName, errors[fieldName]);
+            });
+            
+            field.addEventListener('input', function() {
+                // Clear error as user types (if there was one)
+                const errorElement = document.getElementById(fieldName + '-error');
+                if (errorElement && errorElement.classList.contains('show')) {
+                    const errors = validateField(fieldName, this.value);
+                    if (!errors[fieldName]) {
+                        showFieldError(fieldName, '');
+                    }
+                }
+            });
+        }
+    });
 }
 
 // Initialize EmailJS
@@ -114,313 +380,209 @@ if (typeof emailjs !== 'undefined') {
 
 // Contact form event handler
 if (contactForm && submitBtn) {
+    // Initialize real-time validation
+    addRealTimeValidation();
+    
     submitBtn.addEventListener('click', async function(event) {
         event.preventDefault();
         
         // Check if EmailJS is available
         if (typeof emailjs === 'undefined') {
             formStatus.textContent = 'Email service not available. Please refresh the page.';
-            formStatus.style.color = '#ff6b6b';
+            formStatus.className = 'form-status error';
             return;
         }
         
-        // Disable button during sending
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
+        // Get form data
+        const formData = new FormData(contactForm);
+        const name = formData.get('name');
+        const email = formData.get('email');
+        const title = formData.get('title');
+        const message = formData.get('message');
         
-        formStatus.textContent = 'Sending...';
-        formStatus.style.color = '#e50914';
+        // Validate all fields
+        const allErrors = {};
+        ['name', 'email', 'title', 'message'].forEach(field => {
+            const fieldErrors = validateField(field, formData.get(field));
+            Object.assign(allErrors, fieldErrors);
+        });
+        
+        // Show any validation errors
+        let hasErrors = false;
+        Object.keys(allErrors).forEach(fieldName => {
+            showFieldError(fieldName, allErrors[fieldName]);
+            hasErrors = true;
+        });
+        
+        if (hasErrors) {
+            formStatus.textContent = 'Please fix the errors above and try again.';
+            formStatus.className = 'form-status error';
+            return;
+        }
+        
+        // Update button to show loading state
+        const btnText = submitBtn.querySelector('.btn-text');
+        const btnLoading = submitBtn.querySelector('.btn-loading');
+        
+        submitBtn.disabled = true;
+        if (btnText) btnText.style.display = 'none';
+        if (btnLoading) btnLoading.style.display = 'inline';
+        
+        formStatus.textContent = 'Sending your message...';
+        formStatus.className = 'form-status';
         
         try {
-            // Get form data
-            const formData = new FormData(contactForm);
-            
-            // Validate form
-            const validationErrors = validateForm(formData);
-            if (validationErrors.length > 0) {
-                formStatus.textContent = validationErrors[0];
-                formStatus.style.color = '#ff6b6b';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Send Message';
-                return;
-            }
-            
-            console.log('=== EMAILJS DEBUG INFO ===');
-            console.log('EmailJS available:', typeof emailjs !== 'undefined');
-            console.log('Service ID:', EJ_SERVICE_ID);
-            console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
-            console.log('Public Key:', EJ_PUBLIC_KEY);
-
-            // Prepare email parameters - Use standard EmailJS template parameter names
+            // Prepare email parameters
             const contactParams = {
                 to_email: 'notdeath@duck.com',
-                from_name: formData.get('name'),
-                from_email: formData.get('email'),
-                subject: formData.get('title'),
-                message: formData.get('message')
+                from_name: name,
+                from_email: email,
+                subject: title,
+                message: message
             };
 
-            console.log('=== EMAILJS PARAMETER CHECK ===');
-            console.log('Contact params keys:', Object.keys(contactParams));
-            console.log('Contact parameters:', contactParams);
-
-            console.log('=== SENDING EMAILJS REQUEST ===');
-            console.log('Service ID:', EJ_SERVICE_ID);
-            console.log('Contact Template ID:', EJ_CONTACT_TEMPLATE_ID);
-
             // Send contact message
-            console.log('Sending contact message...');
             const contactResponse = await emailjs.send(EJ_SERVICE_ID, EJ_CONTACT_TEMPLATE_ID, contactParams);
             console.log('Contact email sent successfully!', contactResponse);
             
-            formStatus.textContent = 'Message sent successfully!';
-            formStatus.style.color = '#00cc00';
+            formStatus.textContent = 'Message sent successfully! I\'ll get back to you soon.';
+            formStatus.className = 'form-status success';
             contactForm.reset();
-            showToast('Message sent successfully!');
+            
+            // Clear all field errors
+            ['name', 'email', 'title', 'message'].forEach(fieldName => {
+                showFieldError(fieldName, '');
+            });
+            
+            showToast('Message sent successfully!', 4000);
             
         } catch (error) {
             console.error('EmailJS failed:', error);
-            console.log('=== EMAILJS ERROR DETAILS ===');
-            console.log('Error status:', error.status);
-            console.log('Error text:', error.text);
-            console.log('Error message:', error.message);
-            console.log('Full error object:', error);
             
             // Handle specific EmailJS errors
             let errorMessage = 'Failed to send message. Please try again.';
             
             if (error.status === 422) {
-                console.log('422 Error detected - this suggests EmailJS template issues');
-                errorMessage = 'EmailJS template configuration issue. Please check your EmailJS service setup.';
+                errorMessage = 'Email configuration issue. Please contact support.';
             } else if (error.status === 429) {
                 errorMessage = 'Too many requests. Please wait a moment before trying again.';
             } else if (error.text && error.text.includes('service')) {
-                errorMessage = 'Email service configuration error. Please contact support.';
+                errorMessage = 'Email service error. Please contact support.';
             } else {
-                // More generic error handling
-                errorMessage = `EmailJS Error: ${error.message || 'Unknown error'}`;
+                errorMessage = `Error: ${error.message || 'Unknown error occurred'}`;
             }
             
             formStatus.textContent = errorMessage;
-            formStatus.style.color = '#ff6b6b';
+            formStatus.className = 'form-status error';
             showToast('Failed to send message. Please try again.');
             
         } finally {
-            // Re-enable button
+            // Restore button state
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Send Message';
+            if (btnText) btnText.style.display = 'inline';
+            if (btnLoading) btnLoading.style.display = 'none';
         }
     });
 }
 
-/* Live Status Polling and UI */
+/* Project Filtering */
 (function() {
-    const DEFAULT_POLL = 30000; // 30s
-    const BACKOFF_POLL = 60000; // 60s after repeated failures
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const projectCards = document.querySelectorAll('.project-card');
 
-    const statusBanner = document.getElementById('status-banner');
-    const statusBadge = document.getElementById('status-badge');
-    const statusMessage = document.getElementById('status-message');
-    const lastUpdated = document.getElementById('last-updated');
-    const statusError = document.getElementById('status-error');
-    const refreshBtn = document.getElementById('refresh-status');
-    const componentsList = document.getElementById('components-list');
-    const incidentsList = document.getElementById('incidents-list');
-    const reportForm = document.getElementById('report-form');
-    const reportStatus = document.getElementById('report-status');
+    if (filterButtons.length === 0 || projectCards.length === 0) return;
 
-    if (!statusBadge) return; // No live status UI present
-
-    function getEndpoint() {
-        const meta = document.querySelector('meta[name="status-endpoint"]');
-        if (window.STATUS_ENDPOINT) return window.STATUS_ENDPOINT;
-        if (meta && meta.content) return meta.content;
-        return 'status.json';
-    }
-
-    function showBanner(text) {
-        if (!statusBanner) return;
-        statusBanner.classList.remove('hidden');
-        document.getElementById('banner-text').textContent = text;
-    }
-
-    function hideBanner() {
-        if (!statusBanner) return;
-        statusBanner.classList.add('hidden');
-    }
-
-    function renderComponents(components) {
-        if (!componentsList) return;
-        componentsList.innerHTML = '';
-        if (!components || components.length === 0) {
-            componentsList.innerHTML = '<div class="small">No components defined.</div>';
-            return;
-        }
-        components.forEach(c => {
-            const el = document.createElement('div');
-            el.className = 'component';
-            const name = document.createElement('div'); name.className = 'name'; name.textContent = c.name || c.id;
-            const status = document.createElement('div'); status.className = 'small'; status.textContent = 'Status: ' + (c.status || 'unknown');
-            const desc = document.createElement('div'); desc.className = 'small'; desc.textContent = c.description || '';
-            el.appendChild(name); el.appendChild(status); el.appendChild(desc);
-            componentsList.appendChild(el);
-        });
-    }
-
-    function renderIncidents(incidents) {
-        if (!incidentsList) return;
-        incidentsList.innerHTML = '';
-        if (!incidents || incidents.length === 0) {
-            incidentsList.textContent = 'No incidents reported.';
-            return;
-        }
-        incidents.forEach(i => {
-            const el = document.createElement('div');
-            el.className = 'incident';
-            const title = document.createElement('div'); title.className = 'name'; title.textContent = i.title || 'Incident';
-            const status = document.createElement('div'); status.className = 'small'; status.textContent = (i.status || '') + (i.impact ? (' • ' + i.impact) : '');
-            const body = document.createElement('div'); body.className = 'small'; body.textContent = i.description || (i.updates && i.updates[0] && i.updates[0].content) || '';
-            el.appendChild(title); el.appendChild(status); el.appendChild(body);
-            incidentsList.appendChild(el);
-        });
-    }
-
-    function setStatusView(state, message, updatedAt) {
-        statusBadge.classList.remove('online', 'offline', 'unknown');
-        statusBadge.classList.add(state);
-        statusBadge.textContent = state.charAt(0).toUpperCase() + state.slice(1);
-        statusMessage.textContent = message || '';
-        if (updatedAt) {
-            const d = new Date(updatedAt);
-            lastUpdated.textContent = 'Last updated: ' + d.toLocaleString();
-        }
-        statusError.textContent = '';
-        // Show banner if degraded/offline
-        if (state === 'offline' || state === 'degraded') {
-            showBanner(message || 'Some services are experiencing issues.');
-        } else {
-            hideBanner();
-        }
-    }
-
-    function setError(err) {
-        statusBadge.classList.remove('online', 'offline');
-        statusBadge.classList.add('unknown');
-        statusBadge.textContent = 'Unknown';
-        statusError.textContent = err ? String(err) : '';
-        showBanner('Unable to fetch status.');
-    }
-
-    let pollTimer = null;
-    let consecutiveErrors = 0;
-
-    async function fetchStatus() {
-        const endpoint = getEndpoint();
-        try {
-            const res = await fetch(endpoint, { cache: 'no-store' });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-
-            // Support for the richer schema
-            // { summary, status, updated_at, components: [], incidents: [] }
-            const overall = (data.status || data.overall || data.summary || '').toLowerCase();
-            const message = data.message || data.description || data.details || data.summary || '';
-            const updated = data.updated_at || data.updated || data.time || new Date().toISOString();
-
-            // Determine top-level state
-            let state = 'unknown';
-            if (overall === 'online' || overall === 'up' || overall === 'ok') state = 'online';
-            else if (overall === 'degraded' || overall === 'maintenance') state = 'degraded';
-            else if (overall === 'offline' || overall === 'down') state = 'offline';
-
-            // If components present, derive state from them
-            if (Array.isArray(data.components) && data.components.length) {
-                renderComponents(data.components);
-                // if any component offline -> offline; if any degraded -> degraded
-                const hasOffline = data.components.some(c => ['offline','down'].includes((c.status||'').toLowerCase()));
-                const hasDegraded = data.components.some(c => ['degraded','maintenance'].includes((c.status||'').toLowerCase()));
-                if (hasOffline) state = 'offline';
-                else if (hasDegraded) state = 'degraded';
+    function filterProjects(filter) {
+        projectCards.forEach(card => {
+            const categories = card.getAttribute('data-category');
+            if (filter === 'all' || categories.includes(filter)) {
+                card.classList.remove('hidden');
+                card.style.animation = 'fadeIn 0.5s ease';
+            } else {
+                card.classList.add('hidden');
             }
-
-            renderIncidents(data.incidents);
-
-            setStatusView(state, message || (data.summary || ''), updated);
-            consecutiveErrors = 0;
-        } catch (err) {
-            consecutiveErrors += 1;
-            setError(err.message || 'Unable to fetch status.');
-            console.error('Status fetch error:', err);
-        }
-        scheduleNext();
-    }
-
-    async function submitReport(ev) {
-        ev.preventDefault();
-        if (!reportForm) return;
-        const titleEl = document.getElementById('inc-title');
-        const bodyEl = document.getElementById('inc-body');
-        const honeypotEl = document.getElementById('hp');
-        const tsEl = document.getElementById('report-ts');
-        const title = titleEl ? titleEl.value.trim() : '';
-        const body = bodyEl ? bodyEl.value.trim() : '';
-        const honeypot = honeypotEl ? honeypotEl.value : '';
-        const ts = tsEl && tsEl.value ? tsEl.value : String(Date.now());
-
-        reportStatus.textContent = 'Reporting...';
-        reportStatus.style.color = '#e50914';
-
-        try {
-            const res = await fetch('/api/report', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, body, honeypot, ts })
-            });
-            if (!res.ok) {
-                const j = await res.json().catch(() => ({}));
-                throw new Error(j.error || 'HTTP ' + res.status);
-            }
-            reportStatus.textContent = 'Reported. Thank you.';
-            reportStatus.style.color = '#00cc00';
-            reportForm.reset();
-            showToast('Report sent — thanks.');
-        } catch (err) {
-            console.error('Report error:', err);
-            reportStatus.textContent = 'Failed to report. Please try again later.';
-            reportStatus.style.color = '#ff6b6b';
-            showToast('Failed to send report.');
-        }
-        setTimeout(() => { reportStatus.textContent = ''; }, 5000);
-    }
-
-    // Set timestamp when report details opened to prevent spam (min time check on server)
-    const reportDetails = document.querySelector('.report-box');
-    if (reportDetails) {
-        reportDetails.addEventListener('toggle', () => {
-            const tsEl = document.getElementById('report-ts');
-            if (reportDetails.open && tsEl) tsEl.value = String(Date.now());
         });
     }
 
-
-
-    function scheduleNext() {
-        clearTimeout(pollTimer);
-        const interval = consecutiveErrors >= 3 ? BACKOFF_POLL : DEFAULT_POLL;
-        pollTimer = setTimeout(() => { if (document.visibilityState === 'visible') fetchStatus(); }, interval);
-    }
-
-    function start() { fetchStatus(); }
-    function stop() { clearTimeout(pollTimer); }
-
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') stop(); else fetchStatus();
+    // Add click handlers to filter buttons
+    filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Get filter value and apply it
+            const filter = button.getAttribute('data-filter');
+            filterProjects(filter);
+        });
     });
 
-    if (refreshBtn) refreshBtn.addEventListener('click', () => { consecutiveErrors = 0; fetchStatus(); });
-    if (reportForm) reportForm.addEventListener('submit', submitReport);
-
-    // Start polling
-    start();
+    // Add fade in animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    `;
+    document.head.appendChild(style);
 })();
+
+/* Skills Progress Bar Animation */
+(function() {
+    const skillCards = document.querySelectorAll('.skill-card');
+    
+    if (skillCards.length === 0) return;
+
+    // Function to animate progress bars
+    function animateProgressBars() {
+        skillCards.forEach(card => {
+            const progressBar = card.querySelector('.progress-bar');
+            const level = progressBar.getAttribute('data-level');
+            
+            if (progressBar && level) {
+                // Set CSS custom property for animation
+                progressBar.style.setProperty('--progress-width', level + '%');
+                // Add animate class to trigger animation
+                card.classList.add('animate');
+            }
+        });
+    }
+
+    // Intersection Observer for triggering animation when skills section is visible
+    const observerOptions = {
+        threshold: 0.3,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Add a small delay for better visual effect
+                setTimeout(() => {
+                    animateProgressBars();
+                }, 200);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Observe the skills section
+    const skillsSection = document.getElementById('skills');
+    if (skillsSection) {
+        observer.observe(skillsSection);
+    } else {
+        // Fallback: if section not found, animate immediately
+        setTimeout(animateProgressBars, 1000);
+    }
+})();
+
+
 

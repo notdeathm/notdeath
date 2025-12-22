@@ -1,8 +1,8 @@
-# 💀 Death Status Dashboard
+# 💀 Death's Portfolio
 
 <div align="center">
 
-**A minimalist, dark-themed personal engineering status page**
+**A modern, responsive personal portfolio showcasing skills, projects, and experience**
 
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
@@ -19,186 +19,38 @@
 
 > *"Building apps and websites that just work."*
 
-This is my **personal engineering status page** — a clean, modern interface that showcases live project statuses, recent activity, and what I'm currently building. Inspired by [zedruc.net](https://zedruc.net), this dashboard serves as a living portfolio and project tracker.
+This is my **personal portfolio website** — a clean, modern showcase of my skills, projects, and professional experience. Built with vanilla web technologies to demonstrate clean code, performance optimization, and modern design principles.
 
-**No backend. No database. Just pure static HTML/CSS/JS** — fast, secure, and always online.
+**Zero frameworks. Pure HTML/CSS/JavaScript** — fast, accessible, and always online.
 
 ---
 
 ## ✨ Features
 
-### 🎯 Core Functionality
+### 🎯 Portfolio Showcase
 
-- **✅ Live Project Status** - Real-time up/down indicators for all projects
-- **📦 Recent Activity** - Display recent commits and branch information
-- **🔗 Quick Links** - Direct access to GitHub repos and live project URLs
-- **🛠️ Current Work** - See what I'm actively building right now
-- **⚙️ Tech Stack Display** - Visual badges showing technologies used
+- **💀 Personal Branding** - Clean, modern design with dark theme aesthetic
+- **📊 Skills Visualization** - Interactive progress bars and detailed skill breakdowns
+- **🚀 Project Portfolio** - Filterable project showcase with detailed descriptions
+- **📅 Experience Timeline** - Professional journey and achievements
+- **💌 Contact Integration** - Functional contact form with EmailJS
+- **🎨 Theme Toggle** - Dark/Light mode with smooth transitions
 
-### Live Status Automation
+### ✨ Interactive Elements
 
-The dashboard can automatically fetch a JSON status payload and update in near real-time.
+- **🔍 Project Filtering** - Filter projects by technology (Web, API, Portfolio)
+- **📈 Animated Skills** - Progressive skill bars that animate on scroll
+- **⏱️ Smooth Animations** - Fade-in, slide-in, and scale effects
+- **📱 Scroll to Top** - Fixed button for easy navigation
+- **📋 Real-time Validation** - Instant form feedback and error handling
 
-- Configure endpoint: add a meta tag in `index.html` like
+### 🌟 User Experience
 
-```html
-<meta name="status-endpoint" content="https://example.com/status.json">
-```
-
-or set `window.STATUS_ENDPOINT = 'https://example.com/status.json'` before the page script runs.
-
-- Polling: the page polls the endpoint every 30s (backoff to 60s after repeated failures).
-- Visibility-aware: fetching pauses while the page is hidden and resumes when visible.
-- Manual refresh: click the **Refresh** button in the UI to fetch immediately.
-
-Richer schema (recommended):
-
-```json
-{
-  "summary": "All systems operational",
-  "status": "online",        // 'online' | 'degraded' | 'offline'
-  "updated_at": "2025-12-14T12:00:00Z",
-  "components":[
-    {"id":"site","name":"Website","status":"online","description":"Main site","checked_at":"..."}
-  ],
-  "incidents":[
-    {"id":"20251214-1","title":"API outage","status":"investigating","impact":"major","description":"...","updates":[{"time":"...","content":"..."}]}
-  ]
-}
-```
-
-A local `status.json` file and `status-config.json` are included for quick testing when serving the static site locally.
-
-**Automation Options (free-friendly)**
-
-- **Status Badges**: you can embed a simple badge using Shields.io pointing to the raw `status.json` (example):
-
-```
-https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/<owner>/<repo>/main/status.json
-```
-
-Replace `<owner>/<repo>` with your repository path. Shields will render a badge from your JSON `status` or `summary` fields.
-
-
-- **GitHub Actions + Node check script**: a scheduled job runs `scripts/check.js` (no server required) and commits `status.json` to the repo. This is implemented in `.github/workflows/check-status.yml` and is free for public repositories.
-
-- **Vercel Serverless APIs**: optional serverless endpoints are provided in `api/status.js` (on-demand checks) and `api/report.js` (creates GitHub Issue for incident reports). To enable issue creation, set `GITHUB_TOKEN` and `GITHUB_REPO` in Vercel environment variables.
-
-- **Discord Alerts**: `scripts/check.js` supports sending alerts to a Discord webhook when component state changes. Set the webhook in `status-config.json` or as `DISCORD_WEBHOOK` in the environment.
-
-- **EmailJS (contact form)**: the site supports EmailJS. Add meta tags in `index.html` or set `window.EMAILJS_PUBLIC_KEY`, `window.EMAILJS_SERVICE_ID`, and `window.EMAILJS_TEMPLATE_ID` to use real email sends; otherwise the form simulates sending locally. Example meta tags:
-
-```html
-<meta name="emailjs-public-key" content="your_public_key">
-<meta name="emailjs-service" content="your_service_id">
-<meta name="emailjs-template" content="your_template_id">
-```
-
-EmailJS client is included via CDN in `index.html`. Once those values are present the contact form will call `emailjs.sendForm` and show success/failure statuses.
-
-Quick EmailJS setup and test
-
-1. Create an EmailJS account and add an email service (e.g., Gmail). Note service ID (e.g., `service_xxx`).
-2. Create a template that expects `to_email`, `from_name`, `from_email`, and `message` template variables (or adjust names to match the form).
-3. Add meta tags in `index.html` (or set `window.EMAILJS_*` before the script runs):
-
-```html
-<meta name="emailjs-public-key" content="Lnl3z8jkAukMKlYF7">
-<meta name="emailjs-service" content="your_service_id">
-<meta name="emailjs-template" content="your_template_id">
-```
-
-4. The contact form includes a hidden `to_email` field set to `notdeath@duck.com` so messages are sent there.
-
-5. Test locally by serving the site (EmailJS works from browser origins):
-
-```bash
-python3 -m http.server 8000
-# open http://localhost:8000 in your browser and try the contact form
-```
-
-If you want, I can add a small serverless `api/send.js` route to send emails server-side (requires private keys) — let me know if you prefer that over client-side EmailJS.
-
-**What to hide / gitignore**
-
-Do NOT commit any private tokens, secrets, or backups. Recommended additions to `.gitignore`:
-
-```
-# Local env files
-.env
-.env.local
-
-# Secrets / backups
-.secret*
-*credentials*
-
-# If your .well-known/discord contains tokens, don't commit it
-/.well-known/discord
-```
-
-- Use GitHub Secrets for Actions (no need to commit tokens).
-- Use Vercel Environment Variables for runtime secrets (don't commit them).
-
-Note: I sanitized `.well-known/discord` to remove a token; rotate any exposed tokens and consider removing them from git history if you previously committed secrets.
-
-If you want to remove a file from the entire git history (WARNING: this rewrites history and requires a force-push), here are two common approaches:
-
-- Using the BFG Repo Cleaner (simple):
-
-```bash
-# install BFG and run from a clone of your repo
-bfg --delete-files ".well-known/discord"
-git reflog expire --expire=now --all && git gc --prune=now --aggressive
-git push --force
-```
-
-- Using git-filter-repo (recommended, faster/more flexible):
-
-```bash
-# install git-filter-repo and run in a local clone
-git filter-repo --invert-paths --paths .well-known/discord
-git push --force
-```
-
-I removed `.well-known/discord` from the current index (it is no longer tracked) and added a serverless endpoint to serve the discord verification token from environment variables instead.
-
-Quick steps I ran to stop tracking the file in this repository (you can repeat locally if needed):
-
-```bash
-# stop tracking the file but keep it locally
-git rm --cached .well-known/discord
-git commit -m "chore(security): stop tracking .well-known/discord"
-# push the removal
-git push
-```
-
-After rewriting history, rotate any affected tokens (Discord, EmailJS, API keys) immediately and update their stored locations (GitHub Secrets / Vercel environment variables).
-
-
-Serverless setup (Vercel)
-
-- To serve `/.well-known/discord` without committing the token, set `DISCORD_KEY` in Vercel Environment Variables and the included `vercel.json` rewrites `/.well-known/discord` -> `/api/discord`.
-
-Testing `/.well-known/discord` locally and on Vercel
-
-1. Local (uses local `.well-known/discord` if present):
-
-```bash
-# create a local token file (do not commit this)
-echo "dh=YOUR_TOKEN_HERE" > .well-known/discord
-# start a static server for local testing
-python3 -m http.server 8000
-# open http://localhost:8000/.well-known/discord
-```
-
-2. Vercel (recommended):
-
-- Add `DISCORD_KEY` (your token value) to Project → Settings → Environment Variables in Vercel and deploy the site.
-- After deploy, visit `https://your-vercel-deploy.vercel.app/.well-known/discord` and you should see `dh=YOUR_TOKEN_HERE`.
-
-If you see `Not found`, it means no token is configured and no local file exists for the environment the server is running in.
-
-- For contact emails using server-side sending, set `SENDGRID_API_KEY` and `SENDER_EMAIL` in Vercel Environment Variables and the new endpoint `/api/send` will deliver messages sent from the contact form. If you prefer EmailJS client-side sending, add `emailjs-service` and `emailjs-template` meta tags to `index.html`.
+- **🎯 Smooth Scrolling** - Natural navigation between sections
+- **⚡ Intersection Observer** - Performance-optimized animations
+- **📱 Mobile Responsive** - Perfect display on all device sizes
+- **♿ Accessibility** - ARIA labels, keyboard navigation, screen reader support
+- **🎪 Loading States** - Visual feedback for all interactive elements
 
 
 ### 🎨 Design
@@ -251,15 +103,18 @@ This project intentionally avoids frameworks to demonstrate:
 ## 📂 Project Structure
 
 ```
-death-status-dashboard/
-├── .well-known/        # Folder for Discord
-├── └──discord          # Discord key for connection
-├── index.html          # Main HTML structure
-├── styles.css          # All styles and animations
-├── script.js           # Dynamic project rendering
-├── assets/             # Images, icons, media
-│   └── screenshots/    # Dashboard screenshots
-└── README.md           # You are here!
+death-portfolio/
+├── index.html              # Main HTML structure and content
+├── styles.css              # All styles, animations, and responsive design
+├── script.js               # Interactive features, animations, and performance optimizations
+├── manifest.json           # PWA manifest for mobile installation
+├── sw.js                   # Service worker for offline functionality
+├── vercel.json             # Vercel deployment configuration
+├── sitemap.xml             # SEO sitemap for search engines
+├── assets/                 # Images, icons, and media assets
+│   └── icon.png           # Favicon and app icon
+├── .well-known/           # Web verification files
+└── README.md              # Project documentation
 ```
 
 ---
@@ -270,25 +125,27 @@ death-status-dashboard/
 
 ### **[notdeath](https://notdeath.vercel.app)**
 
-This dashboard is meant to be **viewed online only**. The code is displayed here for showcase purposes.
+This portfolio is meant to be **viewed online only**. The code is displayed here for showcase purposes.
 
 ---
 
 ## 📊 Features Breakdown
 
-### Project Cards
+### Portfolio Sections
 
-Each project card displays:
-- ✅ **Status Indicator** - Green (up) or Red (down)
-- 📝 **Project Name** - Clear identification
-- 📄 **Description** - Brief overview
-- 🔗 **GitHub Link** - Direct to repository
-- 🌐 **Live URL** - View deployed project
-- 🏷️ **Tech Badges** - Technologies used
+Each section is designed for maximum impact:
+- **👤 About** - Personal introduction and background
+- **📊 Skills** - Interactive skill bars with detailed descriptions
+- **🚀 Projects** - Filterable showcase with technology tags
+- **📅 Experience** - Timeline of professional journey
+- **💌 Contact** - Enhanced contact form with validation
 
-### Dynamic Rendering
+### Dynamic Features
 
-Projects are dynamically rendered using JavaScript for easy updates and maintenance.
+- **Project Filtering** - JavaScript-powered category filtering
+- **Skill Animations** - Scroll-triggered progress bar animations
+- **Form Validation** - Real-time input validation and feedback
+- **Smooth Scrolling** - Navigation with animated transitions
 
 ### Responsive Design
 
@@ -340,7 +197,7 @@ Breakpoints ensure perfect display on all devices:
 - ✅ Browse the code to see implementation techniques
 - ✅ Learn from the structure and approach
 - ✅ Get inspired for your own projects
-- ✅ **Report bugs or issues** - Found something broken? [Open an issue](https://github.com/notdeathm/death-status-dashboard/issues)
+- ✅ **Report bugs or issues** - Found something broken? [Open an issue](https://github.com/notdeathm/notdeath/issues)
 - ✅ **Share feedback** - Suggestions and thoughts are welcome via Issues
 
 **This code is my personal work and is not available for use, modification, or distribution.**
@@ -351,12 +208,14 @@ Breakpoints ensure perfect display on all devices:
 
 Potential features I may add:
 
-- [✔️] GitHub API integration for automatic commit updates
+- [✔️] Project filtering by technology
+- [✔️] Interactive skills visualization
+- [✔️] Experience timeline
+- [✔️] Enhanced contact form with validation
+- [✔️] Smooth scroll animations
 - [ ] Blog section for development thoughts
-- [ ] Contact form with backend integration
-- [✔️] Dark/Light theme toggle
-- [ ] Project filtering by technology
-- [ ] Analytics dashboard
+- [ ] Additional project showcases
+- [ ] Performance optimizations
 
 ---
 
