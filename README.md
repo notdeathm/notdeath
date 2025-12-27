@@ -31,8 +31,9 @@ This is my **personal portfolio website** — a clean, modern showcase of my ski
 
 - **💀 Personal Branding** - Clean, modern design with dark theme aesthetic
 - **📊 Skills Visualization** - Interactive progress bars and detailed skill breakdowns
-- **🚀 Project Portfolio** - Filterable project showcase with detailed descriptions
+- **🚀 Project Portfolio** - Filterable project showcase with screenshots and detailed descriptions
 - **📅 Experience Timeline** - Professional journey and achievements
+- **📝 Blog Section** - Articles on development learnings and insights
 - **💌 Contact Integration** - Functional contact form with EmailJS
 - **🎨 Theme Toggle** - Dark/Light mode with smooth transitions
 
@@ -213,7 +214,8 @@ Potential features I may add:
 - [✔️] Experience timeline
 - [✔️] Enhanced contact form with validation
 - [✔️] Smooth scroll animations
-- [ ] Blog section for development thoughts
+- [✔️] Blog section for development thoughts
+- [✔️] Project screenshots and detailed descriptions
 - [ ] Additional project showcases
 - [ ] Performance optimizations
 

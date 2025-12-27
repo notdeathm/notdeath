@@ -1,61 +1,118 @@
-/* Smooth Scroll and Intersection Observer Animations */
+/* Performance Optimizations */
 (function() {
-    // Add CSS for scroll animations
-    const scrollAnimationsCSS = `
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .slide-in-left {
-            opacity: 0;
-            transform: translateX(-50px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        
-        .slide-in-left.visible {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        
-        .slide-in-right {
-            opacity: 0;
-            transform: translateX(50px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        
-        .slide-in-right.visible {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        
-        .scale-in {
-            opacity: 0;
-            transform: scale(0.9);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-        
-        .scale-in.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        /* Stagger animation delays for children */
-        .stagger-children > * {
-            transition-delay: calc(var(--stagger-delay, 0) * 100ms);
-        }
-    `;
-    
-    // Add the CSS to the document
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = scrollAnimationsCSS;
-    document.head.appendChild(styleSheet);
+    // Preload critical resources
+    function preloadCriticalResources() {
+        const criticalImages = [
+            'https://github.com/notdeathm.png',
+            'assets/icon.png'
+        ];
+
+        criticalImages.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+    }
+
+    // Optimize animations for performance
+    function optimizeAnimations() {
+        // Use transform and opacity for better performance
+        const style = document.createElement('style');
+        style.textContent = `
+            .fade-in {
+                opacity: 0;
+                transform: translateY(30px);
+                transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                will-change: opacity, transform;
+            }
+
+            .fade-in.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .slide-in-left {
+                opacity: 0;
+                transform: translateX(-50px);
+                transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                will-change: opacity, transform;
+            }
+
+            .slide-in-left.visible {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .slide-in-right {
+                opacity: 0;
+                transform: translateX(50px);
+                transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                will-change: opacity, transform;
+            }
+
+            .slide-in-right.visible {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .scale-in {
+                opacity: 0;
+                transform: scale(0.9);
+                transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                will-change: opacity, transform;
+            }
+
+            .scale-in.visible {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            /* Stagger animation delays for children */
+            .stagger-children > * {
+                transition-delay: calc(var(--stagger-delay, 0) * 100ms);
+            }
+
+            /* Remove will-change after animation completes */
+            .fade-in.visible,
+            .slide-in-left.visible,
+            .slide-in-right.visible,
+            .scale-in.visible {
+                will-change: auto;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // Lazy load images
+    function initLazyLoading() {
+        const images = document.querySelectorAll('img[data-src]');
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.remove('lazy');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        images.forEach(img => imageObserver.observe(img));
+    }
+
+    // Initialize performance optimizations
+    function init() {
+        preloadCriticalResources();
+        optimizeAnimations();
+        initLazyLoading();
+    }
+
+    // Run optimizations when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
     
     // Smooth scroll behavior for anchor links
     function initSmoothScroll() {
