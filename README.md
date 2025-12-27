@@ -217,7 +217,7 @@ Potential features I may add:
 - [✔️] Blog section for development thoughts
 - [✔️] Project screenshots and detailed descriptions
 - [ ] Additional project showcases
-- [ ] Performance optimizations
+- [✔️] Performance optimizations
 
 ---
 
