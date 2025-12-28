@@ -216,7 +216,7 @@ Potential features I may add:
 - [✔️] Smooth scroll animations
 - [✔️] Blog section for development thoughts
 - [✔️] Project screenshots and detailed descriptions
-- [ ] Additional project showcases
+- [✔️] Additional project showcases
 - [✔️] Performance optimizations
 
 ---
